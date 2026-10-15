@@ -1,0 +1,830 @@
+/* ============================================================
+   CogniCare - style.css
+   ------------------------------------------------------------
+   Senior-friendly design system (WCAG 2.2 AA).  FR009, FR010, FR025
+
+   HOW THEMES ARE SWITCHED (done by app.js from the user's profile):
+     document.documentElement.dataset.font     = "small" | "medium" | "large" | "extra-large"
+     document.documentElement.dataset.contrast = "high"   (omit for normal)
+
+   CONTENTS
+     1. Design tokens (colours, spacing, font sizes)
+     2. High-contrast theme
+     3. Base / reset
+     4. Layout (header, nav, container, footer)
+     5. Buttons
+     6. Forms
+     7. Cards, alerts, modal
+     8. Home page
+     9. Games - shared (info bar, progress, feedback flash)
+    10. N-Back game
+    11. Match-3 game
+    12. Dashboard (stats, chart, table)
+    13. Settings
+    14. Admin
+    15. Utilities & responsive
+   ============================================================ */
+
+
+/* ------------------------------------------------------------
+   1. DESIGN TOKENS
+   Every text/background pair below is at least 4.5:1.
+   ------------------------------------------------------------ */
+:root {
+  /* Colours */
+  --bg: #f7f9fc;
+  --surface: #ffffff;
+  --text: #1a1a1a;
+  --text-muted: #4a5568;
+  --border: #8a94a6;
+
+  --primary: #0b5ea8;          /* white text on it: ~6.6:1 */
+  --primary-hover: #084a86;
+  --on-primary: #ffffff;
+
+  --success: #1b6e3a;          /* white text on it: ~6.3:1 */
+  --on-success: #ffffff;
+  --success-bg: #e3f4e8;
+
+  --danger: #b3261e;           /* white text on it: ~6.5:1 */
+  --on-danger: #ffffff;
+  --danger-bg: #fdeaea;
+
+  --warning-bg: #fff4cc;
+  --info-bg: #e5f0fb;
+
+  --focus: #ff8f00;            /* focus ring */
+
+  /* Game board */
+  --board-bg: #1f2937;
+  --tile-0: #ef5350;           /* red    */
+  --tile-1: #42a5f5;           /* blue   */
+  --tile-2: #66bb6a;           /* green  */
+  --tile-3: #fdd835;           /* yellow */
+  --tile-4: #ba68c8;           /* purple */
+  --tile-text: #111111;
+
+  /* Shape */
+  --radius: 14px;
+  --radius-sm: 10px;
+  --shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+
+  /* Spacing */
+  --space-1: 0.5rem;
+  --space-2: 1rem;
+  --space-3: 1.5rem;
+  --space-4: 2rem;
+
+  /* Touch target minimums (FR025) */
+  --target: 48px;
+  --target-game: 60px;
+
+  font-size: 20px;             /* default = "medium" */
+}
+
+/* Font-size options (FR009). Smallest is 18px = the required minimum. */
+:root[data-font="small"]       { font-size: 18px; }
+:root[data-font="medium"]      { font-size: 20px; }
+:root[data-font="large"]       { font-size: 24px; }
+:root[data-font="extra-large"] { font-size: 28px; }
+
+
+/* ------------------------------------------------------------
+   2. HIGH-CONTRAST THEME  (FR010)
+   Black background, white text, yellow accents.
+   ------------------------------------------------------------ */
+:root[data-contrast="high"] {
+  --bg: #000000;
+  --surface: #000000;
+  --text: #ffffff;
+  --text-muted: #ffffff;
+  --border: #ffffff;
+
+  --primary: #ffd400;
+  --primary-hover: #ffe766;
+  --on-primary: #000000;
+
+  --success: #00e676;
+  --on-success: #000000;
+  --success-bg: #000000;
+
+  --danger: #ff6b6b;
+  --on-danger: #000000;
+  --danger-bg: #000000;
+
+  --warning-bg: #000000;
+  --info-bg: #000000;
+
+  --focus: #00e5ff;
+  --shadow: none;
+
+  --board-bg: #000000;
+  --tile-text: #000000;
+}
+
+/* Extra borders so shapes stay visible without shadows */
+:root[data-contrast="high"] .card,
+:root[data-contrast="high"] .alert,
+:root[data-contrast="high"] .site-header,
+:root[data-contrast="high"] .stat,
+:root[data-contrast="high"] .modal-box {
+  border: 3px solid #ffffff;
+}
+:root[data-contrast="high"] a { color: #ffd400; }
+:root[data-contrast="high"] .tile { border-color: #ffffff; }
+
+
+/* ------------------------------------------------------------
+   3. BASE / RESET
+   ------------------------------------------------------------ */
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", Roboto, Arial, "Helvetica Neue", sans-serif;
+  font-size: 1rem;              /* never below 18px */
+  line-height: 1.6;
+  color: var(--text);
+  background: var(--bg);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+h1, h2, h3 { line-height: 1.25; margin: 0 0 var(--space-2); }
+h1 { font-size: 2rem; }
+h2 { font-size: 1.6rem; }
+h3 { font-size: 1.3rem; }
+p  { margin: 0 0 var(--space-2); }
+
+a { color: var(--primary); text-decoration: underline; }
+a:hover { text-decoration-thickness: 3px; }
+
+img, canvas { max-width: 100%; }
+
+/* Clear keyboard / switch focus on EVERYTHING interactive */
+:focus-visible {
+  outline: 4px solid var(--focus);
+  outline-offset: 3px;
+}
+
+/* "Skip to content" link for keyboard and screen-reader users */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  background: var(--primary);
+  color: var(--on-primary);
+  padding: var(--space-1) var(--space-2);
+  z-index: 1000;
+  border-radius: 0 0 var(--radius-sm) 0;
+}
+.skip-link:focus { left: 0; }
+
+/* Text only for screen readers */
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Respect "reduce motion" settings */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+
+/* ------------------------------------------------------------
+   4. LAYOUT
+   ------------------------------------------------------------ */
+.container {
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: var(--space-3) var(--space-2);
+  flex: 1;
+}
+.container-narrow { max-width: 520px; }
+
+.site-header {
+  background: var(--surface);
+  border-bottom: 4px solid var(--primary);
+  box-shadow: var(--shadow);
+}
+.header-inner {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: var(--space-1) var(--space-2);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-1);
+}
+.brand {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--primary);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target);
+}
+
+/* Main navigation - same on every page (consistent navigation) */
+.main-nav ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+.main-nav a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--target);
+  min-width: var(--target);
+  padding: 0.4rem 1rem;
+  border-radius: var(--radius);
+  font-weight: 700;
+  color: var(--text);
+  text-decoration: none;
+  border: 2px solid transparent;
+}
+.main-nav a:hover { background: var(--info-bg); border-color: var(--primary); }
+/* Current page marked with BOTH colour and an underline (not colour alone) */
+.main-nav a[aria-current="page"] {
+  background: var(--primary);
+  color: var(--on-primary);
+  text-decoration: underline;
+  text-underline-offset: 5px;
+}
+
+.site-footer {
+  text-align: center;
+  padding: var(--space-2);
+  color: var(--text-muted);
+  border-top: 2px solid var(--border);
+  font-size: 1rem;
+}
+
+
+/* ------------------------------------------------------------
+   5. BUTTONS   (minimum 48x48px, rounded, no complex gestures)
+   ------------------------------------------------------------ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: var(--target);
+  min-width: var(--target);
+  padding: 0.7rem 1.5rem;
+  font: inherit;
+  font-weight: 700;
+  line-height: 1.2;
+  text-decoration: none;
+  color: var(--on-primary);
+  background: var(--primary);
+  border: 3px solid var(--primary);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.btn:hover { background: var(--primary-hover); border-color: var(--primary-hover); }
+.btn:active { transform: translateY(1px); }
+
+.btn-secondary {
+  background: var(--surface);
+  color: var(--primary);
+  border-color: var(--primary);
+}
+.btn-secondary:hover { background: var(--info-bg); }
+
+.btn-success { background: var(--success); border-color: var(--success); color: var(--on-success); }
+.btn-danger  { background: var(--danger);  border-color: var(--danger);  color: var(--on-danger); }
+.btn-success:hover, .btn-danger:hover { filter: brightness(0.9); }
+
+.btn-large { min-height: var(--target-game); font-size: 1.3rem; padding: 0.9rem 2rem; }
+.btn-block { display: flex; width: 100%; }
+
+.btn:disabled, .btn[aria-disabled="true"] {
+  opacity: 0.55;
+  cursor: not-allowed;
+  text-decoration: line-through;     /* not colour alone */
+}
+
+.btn-group { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+
+
+/* ------------------------------------------------------------
+   6. FORMS
+   ------------------------------------------------------------ */
+.form-group { margin-bottom: var(--space-3); }
+
+label, .label {
+  display: block;
+  font-weight: 700;
+  margin-bottom: 0.4rem;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+select,
+textarea {
+  width: 100%;
+  min-height: var(--target);
+  padding: 0.6rem 0.9rem;
+  font: inherit;
+  color: var(--text);
+  background: var(--surface);
+  border: 3px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+input:focus, select:focus, textarea:focus { border-color: var(--primary); }
+
+/* Error state: red border + icon text, not colour alone */
+.field-error {
+  display: block;
+  margin-top: 0.4rem;
+  color: var(--danger);
+  font-weight: 700;
+}
+.field-error::before { content: "\26A0\FE0F  "; }
+input[aria-invalid="true"] { border-color: var(--danger); }
+
+/* Radio / checkbox rows - big touch target */
+.choice {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  min-height: var(--target);
+  padding: 0.4rem 0.8rem;
+  border: 3px solid var(--border);
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--space-1);
+  cursor: pointer;
+  font-weight: 600;
+}
+.choice input { width: 1.6rem; height: 1.6rem; flex-shrink: 0; cursor: pointer; }
+.choice:has(input:checked) { border-color: var(--primary); background: var(--info-bg); }
+
+/* Show/hide password row */
+.password-row { display: flex; gap: var(--space-1); align-items: stretch; }
+.password-row input { flex: 1; }
+
+fieldset { border: 0; padding: 0; margin: 0 0 var(--space-3); }
+legend { font-weight: 800; font-size: 1.2rem; margin-bottom: var(--space-1); padding: 0; }
+
+
+/* ------------------------------------------------------------
+   7. CARDS, ALERTS, MODAL
+   ------------------------------------------------------------ */
+.card {
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--space-3);
+  box-shadow: var(--shadow);
+  margin-bottom: var(--space-3);
+}
+
+/* Messages always carry an icon + words, never colour alone */
+.alert {
+  padding: var(--space-2);
+  border-radius: var(--radius-sm);
+  border: 3px solid var(--border);
+  margin-bottom: var(--space-2);
+  font-weight: 600;
+}
+.alert::before { margin-right: 0.5rem; font-weight: 800; }
+.alert-success { background: var(--success-bg); border-color: var(--success); }
+.alert-success::before { content: "\2714"; }
+.alert-error   { background: var(--danger-bg);  border-color: var(--danger); }
+.alert-error::before   { content: "\2716"; }
+.alert-info    { background: var(--info-bg);    border-color: var(--primary); }
+.alert-info::before    { content: "\2139"; }
+.alert-warning { background: var(--warning-bg); border-color: #b26a00; }
+.alert-warning::before { content: "\26A0"; }
+
+/* Confirmation dialog (e.g. delete user) */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-2);
+  z-index: 500;
+}
+.modal-overlay[hidden] { display: none; }
+.modal-box {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: var(--space-3);
+  max-width: 520px;
+  width: 100%;
+}
+
+/* Loading indicator */
+.loading { text-align: center; padding: var(--space-4); font-weight: 700; }
+.loading::before {
+  content: "";
+  display: block;
+  width: 3rem; height: 3rem;
+  margin: 0 auto var(--space-2);
+  border: 6px solid var(--border);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+
+/* ------------------------------------------------------------
+   8. HOME PAGE
+   ------------------------------------------------------------ */
+.hero { text-align: center; padding: var(--space-3) 0; }
+.hero h1 { font-size: 2.4rem; }
+.hero p  { font-size: 1.2rem; color: var(--text-muted); }
+
+.game-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--space-3);
+}
+.game-card { text-align: center; }
+.game-card .icon { font-size: 3.5rem; line-height: 1; margin-bottom: var(--space-1); }
+
+
+/* ------------------------------------------------------------
+   9. GAMES - SHARED
+   ------------------------------------------------------------ */
+.game-area { text-align: center; }
+
+/* Row showing score / level / round */
+.info-bar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+.info-item {
+  background: var(--surface);
+  border: 3px solid var(--primary);
+  border-radius: var(--radius);
+  padding: 0.4rem 1.2rem;
+  font-size: 1.2rem;
+  font-weight: 800;
+  min-width: 8rem;
+}
+
+/* Instructions panel (FR013) */
+.instructions {
+  text-align: left;
+  background: var(--info-bg);
+  border: 3px solid var(--primary);
+  border-radius: var(--radius);
+  padding: var(--space-2) var(--space-3);
+  margin-bottom: var(--space-3);
+  font-size: 1.1rem;
+}
+
+/* Progress bar: width set by JS; the % text keeps it readable without colour */
+.progress {
+  height: 2rem;
+  background: var(--surface);
+  border: 3px solid var(--border);
+  border-radius: 1rem;
+  overflow: hidden;
+  margin-bottom: var(--space-2);
+  position: relative;
+}
+.progress-fill {
+  height: 100%;
+  width: 0;
+  background: var(--primary);
+  transition: width 0.3s;
+}
+.progress-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.95rem;
+  /* white outline so the label is readable on both fill and empty track */
+  color: var(--text);
+  text-shadow: 0 0 4px var(--bg), 0 0 4px var(--bg), 0 0 4px var(--bg);
+}
+
+/* Feedback banner under the game: icon + words + colour */
+.feedback {
+  min-height: 3.2rem;
+  margin: var(--space-2) 0;
+  font-size: 1.5rem;
+  font-weight: 800;
+}
+.feedback.correct { color: var(--success); }
+.feedback.correct::before { content: "\2714  "; }
+.feedback.wrong   { color: var(--danger); }
+.feedback.wrong::before   { content: "\2716  "; }
+
+/* Whole-panel flash (green / red). The icon in .feedback keeps it
+   understandable for people who cannot tell the colours apart. */
+.flash-correct { animation: flashGreen 0.6s; }
+.flash-wrong   { animation: flashRed 0.6s; }
+@keyframes flashGreen { 0%, 100% { background: transparent; } 30% { background: #a5d6a7; } }
+@keyframes flashRed   { 0%, 100% { background: transparent; } 30% { background: #ef9a9a; } }
+:root[data-contrast="high"] .flash-correct { animation-name: flashGreenHC; }
+:root[data-contrast="high"] .flash-wrong   { animation-name: flashRedHC; }
+@keyframes flashGreenHC { 0%, 100% { background: #000; } 30% { background: #00e676; } }
+@keyframes flashRedHC   { 0%, 100% { background: #000; } 30% { background: #ff6b6b; } }
+
+/* Voice assistant status + toggle */
+.voice-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: var(--target);
+  font-weight: 700;
+}
+.voice-status.listening::before { content: "\1F3A4"; animation: pulse 1s infinite; }
+@keyframes pulse { 50% { transform: scale(1.25); } }
+
+/* End-of-game result panel */
+.result-panel { text-align: center; }
+.result-score { font-size: 3.5rem; font-weight: 800; color: var(--primary); }
+
+
+/* ------------------------------------------------------------
+   10. N-BACK GAME
+   ------------------------------------------------------------ */
+.nback-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: min(100%, 320px);
+  height: 220px;
+  margin: 0 auto var(--space-3);
+  background: var(--surface);
+  border: 6px solid var(--primary);
+  border-radius: var(--radius);
+}
+/* Number must be at least 80px */
+.nback-number {
+  font-size: max(80px, 6rem);
+  font-weight: 800;
+  line-height: 1;
+}
+
+.nback-question { font-size: 1.2rem; font-weight: 700; margin-bottom: var(--space-2); }
+
+.answer-buttons {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+/* YES / NO buttons: at least 60px tall, large text.
+   Different shapes of symbol (tick / cross) as well as colour. */
+.answer-btn {
+  min-height: 80px;
+  min-width: 160px;
+  font-size: 1.8rem;
+  font-weight: 800;
+}
+.answer-btn.yes::before { content: "\2714  "; }
+.answer-btn.no::before  { content: "\2716  "; }
+
+
+/* ------------------------------------------------------------
+   11. MATCH-3 GAME
+   The JS sets  --grid-size  (3, 4 or 5) on .match3-board
+   and puts a data-color="0..4" plus a symbol on each .tile.
+   Symbols (circle, square, triangle, diamond, star) mean the
+   game is playable without telling colours apart.
+   ------------------------------------------------------------ */
+.target-display {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  background: var(--surface);
+  border: 3px solid var(--primary);
+  border-radius: var(--radius);
+  padding: 0.5rem 1.2rem;
+  margin-bottom: var(--space-2);
+  font-weight: 800;
+  font-size: 1.15rem;
+}
+.target-display .tile { width: 60px; height: 60px; font-size: 1.6rem; cursor: default; }
+
+.match3-board {
+  --grid-size: 3;
+  display: grid;
+  grid-template-columns: repeat(var(--grid-size), minmax(60px, 1fr));
+  gap: 8px;
+  width: min(100%, calc(var(--grid-size) * 100px));
+  margin: 0 auto var(--space-3);
+  padding: 12px;
+  background: var(--board-bg);
+  border-radius: var(--radius);
+}
+
+.tile {
+  min-width: 60px;
+  min-height: 60px;
+  aspect-ratio: 1 / 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--tile-text);
+  border: 4px solid transparent;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.15s;
+}
+.tile[data-color="0"] { background: var(--tile-0); }
+.tile[data-color="1"] { background: var(--tile-1); }
+.tile[data-color="2"] { background: var(--tile-2); }
+.tile[data-color="3"] { background: var(--tile-3); }
+.tile[data-color="4"] { background: var(--tile-4); }
+
+.tile:hover { transform: scale(1.05); }
+/* Selected tile: thick white outline (not colour alone) */
+.tile.selected {
+  border-color: #ffffff;
+  outline: 4px dashed #000000;
+  outline-offset: -8px;
+  transform: scale(1.08);
+}
+/* Hint: pulsing outline on the two tiles to swap */
+.tile.hint { animation: hintPulse 1s infinite; border-color: #ffffff; }
+@keyframes hintPulse { 50% { transform: scale(1.15); } }
+/* Matched tiles shrink away; new ones drop in from the top */
+.tile.matched { animation: popOut 0.35s forwards; }
+.tile.falling { animation: dropIn 0.4s; }
+@keyframes popOut { to { transform: scale(0); opacity: 0; } }
+@keyframes dropIn { from { transform: translateY(-120%); opacity: 0; } }
+
+/* Canvas version (if the game is drawn with the Canvas API) */
+.game-canvas {
+  display: block;
+  margin: 0 auto var(--space-3);
+  background: var(--board-bg);
+  border-radius: var(--radius);
+  touch-action: manipulation;     /* no pinch/double-tap zoom surprises */
+}
+
+.combo-text {
+  min-height: 2.2rem;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--primary);
+}
+
+
+/* ------------------------------------------------------------
+   12. DASHBOARD
+   ------------------------------------------------------------ */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+.stat {
+  background: var(--surface);
+  border: 3px solid var(--primary);
+  border-radius: var(--radius);
+  padding: var(--space-2);
+  text-align: center;
+}
+.stat-value { font-size: 2.4rem; font-weight: 800; color: var(--primary); line-height: 1.1; }
+.stat-label { font-weight: 700; color: var(--text-muted); }
+
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  align-items: center;
+  margin-bottom: var(--space-2);
+}
+/* Filter buttons act like tabs; the active one is filled AND has a tick */
+.filter-btn[aria-pressed="true"] { background: var(--primary); color: var(--on-primary); }
+.filter-btn[aria-pressed="true"]::before { content: "\2714"; }
+.filter-btn[aria-pressed="false"] { background: var(--surface); color: var(--primary); }
+
+.chart-box {
+  position: relative;
+  height: 340px;
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+/* Tables scroll sideways on narrow screens instead of breaking */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 1rem; }
+th, td { padding: 0.8rem; text-align: left; border-bottom: 2px solid var(--border); }
+th { background: var(--info-bg); font-weight: 800; }
+tbody tr:nth-child(even) { background: rgba(128, 128, 128, 0.08); }
+:root[data-contrast="high"] th { background: #000; border-bottom: 3px solid #fff; }
+
+.empty-state {
+  text-align: center;
+  padding: var(--space-4) var(--space-2);
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+
+/* ------------------------------------------------------------
+   13. SETTINGS
+   ------------------------------------------------------------ */
+.settings-section { margin-bottom: var(--space-4); }
+
+/* Preview of the chosen font size */
+.font-preview {
+  padding: var(--space-2);
+  border: 2px dashed var(--border);
+  border-radius: var(--radius-sm);
+  margin-top: var(--space-1);
+}
+
+/* On/off switch built from a checkbox (large + word label) */
+.switch-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  min-height: var(--target);
+}
+
+
+/* ------------------------------------------------------------
+   14. ADMIN
+   ------------------------------------------------------------ */
+.admin-tabs { display: flex; flex-wrap: wrap; gap: var(--space-1); margin-bottom: var(--space-3); }
+.status-ok::before   { content: "\2714  "; color: var(--success); font-weight: 800; }
+.status-slow::before { content: "\26A0  "; color: var(--danger);  font-weight: 800; }
+
+
+/* ------------------------------------------------------------
+   15. UTILITIES & RESPONSIVE
+   ------------------------------------------------------------ */
+.text-center { text-align: center; }
+.text-muted  { color: var(--text-muted); }
+.mt-1 { margin-top: var(--space-1); }
+.mt-2 { margin-top: var(--space-2); }
+.mt-3 { margin-top: var(--space-3); }
+.mb-2 { margin-bottom: var(--space-2); }
+.hidden, [hidden] { display: none !important; }
+
+/* Phones and small tablets */
+@media (max-width: 600px) {
+  .container { padding: var(--space-2) 0.75rem; }
+  h1 { font-size: 1.7rem; }
+  .hero h1 { font-size: 2rem; }
+  .header-inner { justify-content: center; }
+  .main-nav ul { justify-content: center; }
+  .answer-btn { min-width: 130px; }
+  .btn-group .btn { flex: 1 1 100%; }
+  .chart-box { height: 280px; }
+
+  /* Games on a phone: score + level side by side, smaller number box,
+     so the number AND the YES/NO buttons fit on one screen without scrolling */
+  .info-bar { gap: var(--space-1); margin-bottom: var(--space-1); }
+  .info-item { flex: 1 1 40%; min-width: 0; font-size: 1rem; padding: 0.3rem 0.6rem; }
+  .progress { height: 1.8rem; margin-bottom: var(--space-1); }
+  .nback-display { height: 150px; margin-bottom: var(--space-1); border-width: 5px; }
+  .nback-question { font-size: 1.05rem; margin-bottom: var(--space-1); }
+  .answer-buttons { gap: var(--space-1); }
+  .answer-btn { min-height: 70px; min-width: 0; flex: 1 1 40%; font-size: 1.5rem; }
+  .feedback { min-height: 2.4rem; margin: var(--space-1) 0; font-size: 1.3rem; }
+}
+
+/* Printing: plain black on white, no navigation */
+@media print {
+  .site-header, .site-footer, .btn, .filter-bar { display: none !important; }
+  body { background: #fff; color: #000; }
+}

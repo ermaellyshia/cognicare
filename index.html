@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<!--
+  CogniCare - index.html  (Home page)
+  FR011, FR012 (open the games), FR025 (senior-friendly, simple navigation)
+
+  The header / menu is drawn by js/app.js into <header id="site-header">.
+  The welcome text and the two game cards are also filled in by app.js.
+  Only elderly users can open this page (data-roles="elderly");
+  caregivers and admins are sent to the dashboard automatically.
+
+  IDs that app.js needs: site-header, welcome-title, welcome-text,
+  menu-view, game-cards, game-view, back-to-menu, game-container.
+-->
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b5ea8">
+  <title>CogniCare</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="home" data-roles="elderly">
+
+  <a class="skip-link" href="#main" data-i18n="skipToContent">Skip to main content</a>
+
+  <!-- Brand + navigation are added here by app.js -->
+  <header id="site-header" class="site-header"></header>
+
+  <main id="main" class="container">
+
+    <!-- ========== MENU: welcome + game cards ========== -->
+    <section id="menu-view" aria-labelledby="welcome-title">
+      <div class="hero">
+        <h1 id="welcome-title" data-i18n="welcome">Welcome</h1>
+        <p id="welcome-text" data-i18n="welcomeText">Let's train your brain with simple and enjoyable games.</p>
+      </div>
+
+      <h2 class="text-center" data-i18n="gamesTitle">Choose a Game</h2>
+
+      <!-- Game cards are created by app.js -->
+      <div id="game-cards" class="game-grid">
+        <p class="loading" role="status" data-i18n="loading">Please wait...</p>
+      </div>
+    </section>
+
+    <!-- ========== GAME AREA: filled when a game starts ========== -->
+    <section id="game-view" aria-label="Game" hidden>
+      <p>
+        <button type="button" id="back-to-menu" class="btn btn-secondary">
+          &larr; <span data-i18n="back">Back</span>
+        </button>
+      </p>
+      <!-- game-nback.js / game-match3.js build their screen in here -->
+      <div id="game-container" class="game-area" aria-live="polite"></div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <p>CogniCare</p>
+  </footer>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

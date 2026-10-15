@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<!--
+  CogniCare - settings.html
+  FR004 (update profile), FR007 (caregiver links elderly user),
+  FR008 (language), FR009 (font size), FR010 (high contrast)
+
+  Who sees what (decided by the script at the bottom):
+    elderly   : profile + language + font size + high contrast
+    caregiver : profile + language + high contrast + link elderly users
+    admin     : profile + language + high contrast
+
+  The header / menu is drawn by js/app.js.
+  The script at the bottom of this file is the settings logic, so the
+  project does not need an extra settings.js file.
+-->
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b5ea8">
+  <title>CogniCare</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* Only used on this page: plain list of linked users */
+    .linked-list { list-style: none; padding: 0; margin: 0; }
+  </style>
+</head>
+<body data-page="settings">
+
+  <a class="skip-link" href="#main" data-i18n="skipToContent">Skip to main content</a>
+
+  <!-- Brand + navigation are added here by app.js -->
+  <header id="site-header" class="site-header"></header>
+
+  <main id="main" class="container container-narrow">
+
+    <h1 data-i18n="settingsTitle">Your Settings</h1>
+
+    <!-- Messages (saved, errors) appear here -->
+    <div id="form-message" role="alert" aria-live="assertive" hidden></div>
+
+    <form id="settings-form" novalidate>
+
+      <!-- ========== PROFILE (all roles) ========== -->
+      <section class="card settings-section" aria-labelledby="profile-heading">
+        <h2 id="profile-heading" data-i18n="profile">Profile</h2>
+
+        <div class="form-group">
+          <label for="name" data-i18n="fullName">Full name</label>
+          <input type="text" id="name" name="name" autocomplete="name" required>
+        </div>
+
+        <div class="form-group">
+          <label for="age" data-i18n="age">Age</label>
+          <input type="number" id="age" name="age" min="1" max="120" inputmode="numeric" required>
+        </div>
+
+        <!-- Email and role cannot be changed here -->
+        <div class="form-group">
+          <label for="email" data-i18n="email">Email</label>
+          <input type="email" id="email" name="email" readonly>
+        </div>
+
+        <div class="form-group">
+          <label for="role" data-i18n="role">Role</label>
+          <input type="text" id="role" name="role" readonly>
+        </div>
+
+        <p class="text-muted"><span data-i18n="memberSince">Member since</span>: <span id="member-since">-</span></p>
+      </section>
+
+      <!-- ========== LANGUAGE (all roles)  FR008 ========== -->
+      <section class="card settings-section">
+        <fieldset>
+          <legend data-i18n="language">Language</legend>
+          <label class="choice" for="lang-bm">
+            <input type="radio" id="lang-bm" name="language" value="bm">
+            <span data-i18n="languageBM">Bahasa Malaysia</span>
+          </label>
+          <label class="choice" for="lang-en">
+            <input type="radio" id="lang-en" name="language" value="en">
+            <span data-i18n="languageEN">English</span>
+          </label>
+        </fieldset>
+      </section>
+
+      <!-- ========== FONT SIZE (elderly only)  FR009 ========== -->
+      <section id="font-section" class="card settings-section" hidden>
+        <fieldset>
+          <legend data-i18n="fontSize">Font Size</legend>
+          <label class="choice" for="font-small">
+            <input type="radio" id="font-small" name="fontSize" value="small">
+            <span data-i18n="fontSmall">Small</span>
+          </label>
+          <label class="choice" for="font-medium">
+            <input type="radio" id="font-medium" name="fontSize" value="medium">
+            <span data-i18n="fontMedium">Medium</span>
+          </label>
+          <label class="choice" for="font-large">
+            <input type="radio" id="font-large" name="fontSize" value="large">
+            <span data-i18n="fontLarge">Large</span>
+          </label>
+          <label class="choice" for="font-xl">
+            <input type="radio" id="font-xl" name="fontSize" value="extra-large">
+            <span data-i18n="fontExtraLarge">Extra Large</span>
+          </label>
+        </fieldset>
+        <!-- The whole page changes size as you choose, this is a sample -->
+        <p class="font-preview" data-i18n="preview">Sample text: this is your font size.</p>
+      </section>
+
+      <!-- ========== HIGH CONTRAST (all roles)  FR010 ========== -->
+      <section class="card settings-section">
+        <fieldset>
+          <legend data-i18n="highContrastMode">High Contrast Mode</legend>
+          <label class="choice" for="contrast">
+            <input type="checkbox" id="contrast" name="contrast">
+            <span id="contrast-state">-</span>
+          </label>
+        </fieldset>
+      </section>
+
+      <button type="submit" id="save-btn" class="btn btn-large btn-block" data-i18n="save">Save</button>
+    </form>
+
+    <!-- ========== LINK ELDERLY USERS (caregiver only)  FR007 ========== -->
+    <section id="link-section" class="card settings-section mt-3" aria-labelledby="link-heading" hidden>
+      <h2 id="link-heading" data-i18n="linkElderly">Link Elderly User</h2>
+      <p data-i18n="linkElderlyText">Enter the email of the elderly person you want to follow.</p>
+
+      <div id="link-message" role="alert" aria-live="assertive" hidden></div>
+
+      <form id="link-form" novalidate>
+        <div class="form-group">
+          <label for="elderly-email" data-i18n="elderlyEmail">Elderly user's email</label>
+          <input type="email" id="elderly-email" autocomplete="off" inputmode="email"
+                 autocapitalize="none" spellcheck="false">
+        </div>
+        <button type="submit" id="link-btn" class="btn btn-block" data-i18n="linkButton">Link</button>
+      </form>
+
+      <h3 class="mt-3" data-i18n="linkedUsers">Linked Elderly Users</h3>
+      <ul id="linked-list" class="linked-list"></ul>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <p>CogniCare</p>
+  </footer>
+
+  <!-- app.js = login check + menu. The module below = this page's logic. -->
+  <script type="module">
+    import { appReady } from "./js/app.js";
+    import { applyUserPreferences, applyDisplayPreferences } from "./js/auth.js";
+    import {
+      updateUserProfile,
+      linkElderlyUser,
+      unlinkElderlyUser,
+      getLinkedUsers,
+      toDate,
+    } from "./js/firebase-config.js";
+    import { t, setLanguage, getLanguage, roleLabel } from "./js/translations.js";
+
+    // ----------------------------------------------------------
+    // Small helpers
+    // ----------------------------------------------------------
+    const $ = (id) => document.getElementById(id);
+
+    /** Show a message in a box (icon + words come from CSS). */
+    function showMessage(box, text, type = "error") {
+      box.className = `alert alert-${type}`;
+      box.textContent = text;
+      box.hidden = false;
+    }
+    function clearMessage(box) {
+      box.hidden = true;
+      box.textContent = "";
+    }
+    function setInvalid(input, invalid) {
+      if (invalid) input.setAttribute("aria-invalid", "true");
+      else input.removeAttribute("aria-invalid");
+    }
+    function looksLikeEmail(v) {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+    }
+
+    // ----------------------------------------------------------
+    // Start: wait until app.js has checked the login
+    // ----------------------------------------------------------
+    const profile = await appReady;
+    if (profile) initSettings(profile);
+
+    function initSettings(profile) {
+      const form = $("settings-form");
+      const box = $("form-message");
+      const contrastBox = $("contrast");
+
+      const isElderly = profile.role === "elderly";
+      const isCaregiver = profile.role === "caregiver";
+
+      // ---- Fill the form with the saved profile ----
+      $("name").value = profile.name || "";
+      $("age").value = profile.age || "";
+      $("email").value = profile.email || "";
+      form.querySelector(`input[name="language"][value="${getLanguage()}"]`).checked = true;
+      contrastBox.checked = Boolean(profile.highContrastMode);
+      const savedFont = profile.fontSize || "large";
+      const fontRadio = form.querySelector(`input[name="fontSize"][value="${savedFont}"]`);
+      if (fontRadio) fontRadio.checked = true;
+
+      // ---- Show only the sections this role may use ----
+      $("font-section").hidden = !isElderly;   // FR009: elderly only
+      $("link-section").hidden = !isCaregiver; // FR007: caregiver only
+
+      // Texts that depend on the language / state
+      function refreshDynamicText() {
+        $("role").value = roleLabel(profile.role);
+        $("contrast-state").textContent = `${t("highContrastMode")}: ${contrastBox.checked ? t("on") : t("off")}`;
+        const created = toDate(profile.createdAt);
+        $("member-since").textContent = created
+          ? created.toLocaleDateString(getLanguage() === "bm" ? "ms-MY" : "en-GB",
+              { year: "numeric", month: "long", day: "numeric" })
+          : "-";
+      }
+      refreshDynamicText();
+
+      // ---- Live preview: the page changes AS the choice is made ----
+      function selectedFont() {
+        return form.querySelector('input[name="fontSize"]:checked')?.value || savedFont;
+      }
+      function previewDisplay() {
+        applyDisplayPreferences(isElderly ? selectedFont() : profile.fontSize, contrastBox.checked);
+        refreshDynamicText();
+      }
+      form.querySelectorAll('input[name="fontSize"]').forEach((r) => r.addEventListener("change", previewDisplay));
+      contrastBox.addEventListener("change", previewDisplay);
+      form.querySelectorAll('input[name="language"]').forEach((r) =>
+        r.addEventListener("change", () => setLanguage(r.value)) // also redraws menu + texts
+      );
+
+      // ---- Save (FR004, FR008, FR009, FR010) ----
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        clearMessage(box);
+        setInvalid($("name"), false);
+        setInvalid($("age"), false);
+
+        const name = $("name").value.trim();
+        const age = Number($("age").value);
+
+        if (!name) {
+          setInvalid($("name"), true);
+          showMessage(box, t("fieldRequired"));
+          $("name").focus();
+          return;
+        }
+        if (!Number.isInteger(age) || age < 1 || age > 120) {
+          setInvalid($("age"), true);
+          showMessage(box, t("ageRange"));
+          $("age").focus();
+          return;
+        }
+
+        const changes = {
+          name,
+          age,
+          languagePreference: form.querySelector('input[name="language"]:checked').value,
+          highContrastMode: contrastBox.checked,
+        };
+        if (isElderly) changes.fontSize = selectedFont();
+
+        const saveBtn = $("save-btn");
+        saveBtn.disabled = true;
+        saveBtn.textContent = t("loading");
+        try {
+          await updateUserProfile(profile.userId, changes);
+          Object.assign(profile, changes);   // keep our copy up to date
+          applyUserPreferences(profile);     // remember on this device too
+          showMessage(box, t("profileUpdated"), "success");
+          box.scrollIntoView({ block: "nearest" });
+        } catch (err) {
+          console.error("Could not save settings:", err);
+          showMessage(box, t("errGeneric"));
+        }
+        saveBtn.disabled = false;
+        saveBtn.textContent = t("save");
+      });
+
+      // ---- Caregiver: link / unlink elderly users (FR007) ----
+      if (isCaregiver) initLinking(profile);
+
+      // Redraw things built by JavaScript when the language changes
+      window.addEventListener("languagechange", () => {
+        refreshDynamicText();
+        if (isCaregiver) renderLinked(profile);
+      });
+    }
+
+    // ----------------------------------------------------------
+    // Caregiver linking
+    // ----------------------------------------------------------
+    function initLinking(profile) {
+      const linkForm = $("link-form");
+      const linkBox = $("link-message");
+      const emailInput = $("elderly-email");
+
+      renderLinked(profile);
+
+      linkForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        clearMessage(linkBox);
+        const email = emailInput.value.trim();
+
+        if (!looksLikeEmail(email)) {
+          setInvalid(emailInput, true);
+          showMessage(linkBox, t("errInvalidEmail"));
+          emailInput.focus();
+          return;
+        }
+        setInvalid(emailInput, false);
+
+        const btn = $("link-btn");
+        btn.disabled = true;
+        try {
+          const elderly = await linkElderlyUser(profile.userId, email);
+          // Keep our local copy in sync so the list refreshes correctly
+          profile.linkedUsers = Array.from(new Set([...(profile.linkedUsers || []), elderly.userId]));
+          emailInput.value = "";
+          showMessage(linkBox, t("linkSuccess", { name: elderly.name }), "success");
+          await renderLinked(profile);
+        } catch (err) {
+          console.error("Link failed:", err);
+          const notFound = String(err.message).startsWith("No elderly user");
+          showMessage(linkBox, t(notFound ? "linkNotFound" : "errGeneric"));
+        }
+        btn.disabled = false;
+      });
+    }
+
+    /** Draw the list of linked elderly users (name, email, Unlink button). */
+    async function renderLinked(profile) {
+      const list = $("linked-list");
+      let users = [];
+      try {
+        users = await getLinkedUsers(profile.userId);
+      } catch (err) {
+        console.error("Could not load linked users:", err);
+        list.replaceChildren(Object.assign(document.createElement("li"), { textContent: t("errGeneric") }));
+        return;
+      }
+
+      if (!users.length) {
+        list.replaceChildren(Object.assign(document.createElement("li"), {
+          className: "empty-state",
+          textContent: t("noLinkedUsers"),
+        }));
+        return;
+      }
+
+      list.replaceChildren(...users.map((user) => {
+        const li = document.createElement("li");
+        li.className = "card";
+
+        const who = document.createElement("p");
+        const strong = document.createElement("strong");
+        strong.textContent = user.name;
+        who.append(strong, document.createElement("br"), document.createTextNode(user.email));
+
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "btn btn-danger";
+        btn.textContent = t("unlink");
+        btn.addEventListener("click", async () => {
+          btn.disabled = true;
+          try {
+            await unlinkElderlyUser(profile.userId, user.userId);
+            profile.linkedUsers = (profile.linkedUsers || []).filter((id) => id !== user.userId);
+            await renderLinked(profile);
+          } catch (err) {
+            console.error("Unlink failed:", err);
+            showMessage($("link-message"), t("errGeneric"));
+            btn.disabled = false;
+          }
+        });
+
+        li.append(who, btn);
+        return li;
+      }));
+    }
+  </script>
+</body>
+</html>
