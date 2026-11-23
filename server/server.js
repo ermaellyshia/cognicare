@@ -11,6 +11,7 @@
  * in separate route files that are added one at a time:
  *
  *   routes/auth.js      register, login, me              (next)
+ *   routes/me.js        disclaimer consent, focus area   (Increment 1)
  *   routes/users.js     profile, settings, caregiver links
  *   routes/sessions.js  save and read game sessions
  *   routes/admin.js     users list, logs, config, performance
@@ -32,6 +33,7 @@ import express from "express";
 import cors from "cors";
 import authRoutes from "./routes/auth.js";
 import sessionRoutes from "./routes/sessions.js";
+import meRoutes from "./routes/me.js";
 
 // ------------------------------------------------------------
 // 1. SETTINGS
@@ -88,6 +90,7 @@ app.get("/api/health", async (req, res) => {
 // Feature routes (more are added in later steps)
 app.use("/api/auth", authRoutes);
 app.use("/api/sessions", sessionRoutes);
+app.use("/api/me", meRoutes);
 
 // ------------------------------------------------------------
 // 4. ERRORS  (must stay AFTER the routes)

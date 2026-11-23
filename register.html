@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!--
-  CogniCare - register.html
+  CogniCare - register.html   (Increment 1 look: css/app.css)
   FR002 (create account), FR008 (language), FR025 (senior-friendly)
 
   All logic is in js/auth.js. The IDs / names below must stay the same:
@@ -14,10 +14,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#0b5ea8">
+  <meta name="theme-color" content="#0b5c6b">
   <title>CogniCare</title>
   <link rel="manifest" href="manifest.json">
-  <link rel="stylesheet" href="css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/app.css">
 </head>
 <body>
 
@@ -36,7 +37,12 @@
     </div>
   </header>
 
-  <main id="main" class="container container-narrow">
+  <main id="main">
+
+    <a class="back-link" href="welcome.html">
+      <span aria-hidden="true">&larr;</span>
+      <span data-i18n="back">Back</span>
+    </a>
 
     <div class="hero">
       <h1 data-i18n="registerTitle">Create a New Account</h1>
@@ -50,6 +56,19 @@
 
       <!-- novalidate: auth.js shows its own translated messages -->
       <form id="register-form" novalidate>
+
+        <!-- Role: two big choices. Admin is intentionally not listed. -->
+        <fieldset>
+          <legend data-i18n="role">Role</legend>
+          <label class="choice" for="role-elderly">
+            <input type="radio" id="role-elderly" name="role" value="elderly" checked>
+            <span data-i18n="roleElderly">Elderly user</span>
+          </label>
+          <label class="choice" for="role-caregiver">
+            <input type="radio" id="role-caregiver" name="role" value="caregiver">
+            <span data-i18n="roleCaregiver">Caregiver</span>
+          </label>
+        </fieldset>
 
         <div class="form-group">
           <label for="name" data-i18n="fullName">Full name</label>
@@ -71,25 +90,12 @@
                  min="1" max="120" inputmode="numeric" required>
         </div>
 
-        <!-- Role: two big choices. Admin is intentionally not listed. -->
-        <fieldset>
-          <legend data-i18n="role">Role</legend>
-          <label class="choice" for="role-elderly">
-            <input type="radio" id="role-elderly" name="role" value="elderly" checked>
-            <span data-i18n="roleElderly">Elderly user</span>
-          </label>
-          <label class="choice" for="role-caregiver">
-            <input type="radio" id="role-caregiver" name="role" value="caregiver">
-            <span data-i18n="roleCaregiver">Caregiver</span>
-          </label>
-        </fieldset>
-
         <div class="form-group">
           <label for="password" data-i18n="password">Password</label>
           <input type="password" id="password" name="password"
                  autocomplete="new-password" data-password required>
           <!-- Simple hint so people know the rule BEFORE they make a mistake -->
-          <small class="text-muted" data-i18n="passwordHint">At least 6 characters.</small>
+          <small class="hint" data-i18n="passwordHint">At least 6 characters.</small>
         </div>
 
         <div class="form-group">
@@ -104,15 +110,14 @@
           <span data-i18n="showPassword">Show password</span>
         </label>
 
-        <button type="submit" id="register-btn"
-                class="btn btn-large btn-block mt-2" data-i18n="register">Register</button>
+        <button type="submit" id="register-btn" class="btn" data-i18n="register">Register</button>
       </form>
     </section>
 
     <!-- Link back to login -->
     <section class="card text-center" aria-labelledby="have-account">
       <p id="have-account" data-i18n="haveAccount">Already have an account?</p>
-      <a class="btn btn-secondary btn-large btn-block" href="login.html" data-i18n="login">Login</a>
+      <a class="btn btn-secondary" href="login.html" data-i18n="login">Login</a>
     </section>
 
   </main>

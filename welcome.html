@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<!--
+  CogniCare - welcome.html  (Increment 1: first screen)
+
+  Two big choices only: Login or Register. Language can be changed here.
+  The logic is in js/welcome.js (language buttons + "already logged in?").
+
+  The text inside each tag is only a fallback shown for a split second;
+  data-i18n replaces it with the chosen language (see translations.js).
+-->
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b5ea8">
+  <title>CogniCare</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Lets keyboard / screen-reader users jump past the header -->
+  <a class="skip-link" href="#main" data-i18n="skipToContent">Skip to main content</a>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <span class="brand">CogniCare</span>
+
+      <div class="btn-group" role="group" aria-labelledby="lang-label">
+        <span id="lang-label" class="sr-only" data-i18n="language">Language</span>
+        <button type="button" class="btn filter-btn" data-set-lang="bm" aria-pressed="false">Bahasa Malaysia</button>
+        <button type="button" class="btn filter-btn" data-set-lang="en" aria-pressed="false">English</button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main" class="container container-narrow">
+
+    <div class="hero">
+      <h1 data-i18n="welcome">Selamat datang</h1>
+      <p data-i18n="tagline">Latihan otak untuk hati yang ceria</p>
+    </div>
+
+    <section class="card" aria-label="CogniCare">
+      <a class="btn btn-large btn-block" href="login.html" data-i18n="login">Log Masuk</a>
+      <a class="btn btn-secondary btn-large btn-block mt-2" href="register.html" data-i18n="register">Daftar</a>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <p>CogniCare</p>
+  </footer>
+
+  <script type="module" src="js/welcome.js"></script>
+</body>
+</html>

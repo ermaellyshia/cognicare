@@ -9,7 +9,10 @@
  *
  * SHAPE OF A SESSION OBJECT (same names the website already uses):
  *   { sessionId, userId, gameType, difficultyLevel, score,
- *     duration, completed, datePlayed }
+ *     duration, completed, datePlayed,
+ *     hitCount, missCount, falseAlarmCount, rejectCount,   (AI data)
+ *     accuracyPct, hitRatePct, falseAlarmPct, avgResponseMs }
+ *   The AI fields are null for games saved before migration_001.
  *   gameType        "N-Back" | "Match-3"
  *   difficultyLevel "2-back"  | "4x4"
  *   duration        seconds
@@ -39,7 +42,49 @@ function toSession(row) {
     duration: row.duration,
     completed: Boolean(row.completed),
     datePlayed: row.played_at,
+    // AI data (null for old games). MySQL gives ROUND() back as text, so
+    // toNumberOrNull turns it into a real number.
+    hitCount: toNumberOrNull(row.hit_count),
+    missCount: toNumberOrNull(row.miss_count),
+    falseAlarmCount: toNumberOrNull(row.false_alarm_count),
+    rejectCount: toNumberOrNull(row.reject_count),
+    accuracyPct: toNumberOrNull(row.accuracy_pct),
+    hitRatePct: toNumberOrNull(row.hit_rate_pct),
+    falseAlarmPct: toNumberOrNull(row.false_alarm_pct),
+    avgResponseMs: toNumberOrNull(row.avg_response_ms),
   };
+}
+
+function toNumberOrNull(value) {
+  return value === null || value === undefined ? null : Number(value);
+}
+
+/**
+ * Read the optional AI data sent by the game.
+ * Either ALL four counts are sent (whole numbers 0..1000) or none.
+ * @returns {null | {hits, misses, falseAlarms, rejects, avgResponseMs}}
+ */
+function readAnswerCounts(result) {
+  const names = ["hitCount", "missCount", "falseAlarmCount", "rejectCount"];
+  const given = names.filter((n) => result?.[n] !== undefined && result?.[n] !== null);
+  if (given.length === 0) return null;
+  if (given.length !== names.length) {
+    throw badInput("Send all four answer counts (hit, miss, false alarm, reject) or none.");
+  }
+  const values = names.map((n) => Number(result[n]));
+  if (values.some((v) => !Number.isInteger(v) || v < 0 || v > 1000)) {
+    throw badInput("Answer counts must be whole numbers from 0 to 1000.");
+  }
+
+  let avgResponseMs = null;
+  if (result.avgResponseMs !== undefined && result.avgResponseMs !== null) {
+    avgResponseMs = Math.round(Number(result.avgResponseMs));
+    if (!Number.isFinite(avgResponseMs) || avgResponseMs < 0 || avgResponseMs > 600_000) {
+      throw badInput("Average response time must be between 0 and 600000 ms.");
+    }
+  }
+  const [hits, misses, falseAlarms, rejects] = values;
+  return { hits, misses, falseAlarms, rejects, avgResponseMs };
 }
 
 // ------------------------------------------------------------
@@ -50,7 +95,9 @@ function toSession(row) {
  * Save one finished game.
  * @param {number} userId
  * @param {{gameType:string, difficultyLevel:string, score:number,
- *          duration?:number, completed?:boolean}} result
+ *          duration?:number, completed?:boolean,
+ *          hitCount?:number, missCount?:number, falseAlarmCount?:number,
+ *          rejectCount?:number, avgResponseMs?:number}} result
  * @returns the saved session
  */
 export async function saveSession(userId, result) {
@@ -67,6 +114,8 @@ export async function saveSession(userId, result) {
     throw badInput("Duration must be between 0 and 86400 seconds.");
   }
 
+  const counts = readAnswerCounts(result); // optional AI data
+
   // The game + level must exist in the lookup tables (seeded by schema.sql).
   const level = await queryOne(
     `SELECT l.level_id
@@ -78,9 +127,22 @@ export async function saveSession(userId, result) {
   if (!level) throw badInput("Unknown game type or difficulty level.");
 
   const saved = await execute(
-    `INSERT INTO game_sessions (user_id, level_id, score, duration_sec, completed)
-     VALUES (?, ?, ?, ?, ?)`,
-    [userId, level.level_id, score, duration, completed ? 1 : 0]
+    `INSERT INTO game_sessions
+       (user_id, level_id, score, hit_count, miss_count, false_alarm_count,
+        reject_count, avg_response_ms, duration_sec, completed)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [
+      userId,
+      level.level_id,
+      score,
+      counts?.hits ?? null,
+      counts?.misses ?? null,
+      counts?.falseAlarms ?? null,
+      counts?.rejects ?? null,
+      counts?.avgResponseMs ?? null,
+      duration,
+      completed ? 1 : 0,
+    ]
   );
   return getSessionById(saved.insertId);
 }

@@ -1,2 +1,14 @@
-node_modules/
+# Rahsia: JANGAN upload ke GitHub (ada password MySQL dan JWT_SECRET)
 .env
+server/.env
+*.env
+!.env.example
+!server/.env.example
+
+# Pakej Node (boleh dipasang semula dengan: npm install)
+node_modules/
+
+# Fail sistem / editor
+.DS_Store
+*.log
+.vscode/

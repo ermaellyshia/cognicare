@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<!--
+  CogniCare - disclaimer.html   (Increment 1: mandatory disclaimer)
+
+  Shown to every NEW user after register / first login. The user must
+  tick the box before the Continue button works. The acceptance date is
+  saved in MySQL (users.disclaimer_accepted_at) by js/disclaimer.js.
+
+  IDs that js/disclaimer.js needs:
+  agree, continue-btn, form-message
+-->
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b5c6b">
+  <title>CogniCare</title>
+  <link rel="manifest" href="manifest.json">
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+
+  <a class="skip-link" href="#main" data-i18n="skipToContent">Skip to main content</a>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <span class="brand">CogniCare</span>
+
+      <div class="btn-group" role="group" aria-labelledby="lang-label">
+        <span id="lang-label" class="sr-only" data-i18n="language">Language</span>
+        <button type="button" class="btn filter-btn" data-set-lang="bm" aria-pressed="false">Bahasa Malaysia</button>
+        <button type="button" class="btn filter-btn" data-set-lang="en" aria-pressed="false">English</button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+
+    <p class="badge" data-i18n="disclaimerBadge">Required step for new users</p>
+
+    <div class="hero">
+      <h1 data-i18n="disclaimerTitle">Before you start</h1>
+      <p data-i18n="disclaimerIntro">Please read these important points.</p>
+    </div>
+
+    <!-- Error message (for example, the server could not save) -->
+    <div id="form-message" role="alert" aria-live="assertive" hidden></div>
+
+    <section class="panel" aria-labelledby="disclaimer-heading">
+      <h2 id="disclaimer-heading" class="sr-only" data-i18n="disclaimerTitle">Before you start</h2>
+      <ul class="checklist">
+        <li data-i18n="disclaimer1">Suggestions are suggestions only, not medical advice.</li>
+        <li data-i18n="disclaimer2">It is not a diagnosis and does not replace a doctor.</li>
+        <li data-i18n="disclaimer3">These activities help keep the mind active.</li>
+        <li data-i18n="disclaimer4">Suggestions may differ from the opinion of an expert.</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <label class="choice panel" for="agree">
+        <input type="checkbox" id="agree" aria-describedby="agree-help">
+        <span data-i18n="disclaimerAgree">I understand and agree</span>
+      </label>
+
+      <button type="button" id="continue-btn" class="btn" disabled
+              aria-describedby="agree-help" data-i18n="disclaimerContinue">Continue</button>
+      <p id="agree-help" class="hint text-center" data-i18n="disclaimerHelp">The button works after you tick the box above.</p>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <p>CogniCare</p>
+  </footer>
+
+  <script type="module" src="js/disclaimer.js"></script>
+</body>
+</html>
