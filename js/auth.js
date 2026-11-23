@@ -44,6 +44,7 @@ import {
   resetPassword,
   friendlyAuthError,
   getCurrentUserProfile,
+  nextStepAfterLogin,
 } from "./firebase-config.js";
 import { t, setLanguage, getLanguage, applyTranslations } from "./translations.js";
 
@@ -108,6 +109,18 @@ export function getHomePageForRole(role) {
   return role === "elderly" ? "index.html" : "dashboard.html";
 }
 
+/**
+ * Where should this user go right now? (Increment 1)
+ *   disclaimer not accepted -> disclaimer.html   (mandatory)
+ *   elderly, no category    -> TODO focus.html   (page not built yet)
+ *   otherwise               -> their home page
+ */
+export function getNextPage(user) {
+  const step = nextStepAfterLogin(user);
+  if (step === "disclaimer") return "disclaimer.html";
+  if (step === "focus") return "focus.html"; // TODO: change to "focus.html" when it exists
+  return getHomePageForRole(user.role);
+}
 /**
  * "Flash" message that survives one page change, e.g. redirected to
  * login with "please log in first". Stores a translation KEY.
@@ -216,7 +229,7 @@ async function initLoginPage(form) {
   const existing = await getCurrentUserProfile();
   if (existing) {
     applyUserPreferences(existing);
-    window.location.replace(getHomePageForRole(existing.role));
+    window.location.replace(getNextPage(existing));
     return;
   }
 
@@ -250,7 +263,7 @@ async function initLoginPage(form) {
     try {
       const profile = await loginUser(email, password);
       applyUserPreferences(profile);
-      window.location.replace(getHomePageForRole(profile.role));
+      window.location.replace(getNextPage(profile));
     } catch (err) {
       console.error("Login failed:", err);
       showMessage(box, t(friendlyAuthError(err).key));
@@ -326,7 +339,7 @@ async function initRegisterPage(form) {
   // Already logged in? No need to register again.
   const existing = await getCurrentUserProfile();
   if (existing) {
-    window.location.replace(getHomePageForRole(existing.role));
+    window.location.replace(getNextPage(existing));
     return;
   }
 
@@ -379,7 +392,7 @@ async function initRegisterPage(form) {
       applyUserPreferences(profile);
       showMessage(box, t("registerSuccess"), "success");
       // Short pause so the success message can be read (and heard by screen readers)
-      setTimeout(() => window.location.replace(getHomePageForRole(profile.role)), 1500);
+      setTimeout(() => window.location.replace(getNextPage(profile)), 1500);
     } catch (err) {
       console.error("Registration failed:", err);
       if (err?.code === "auth/email-already-in-use") setInvalid(fields.email, true);
@@ -408,9 +421,14 @@ export async function requireAuth(allowedRoles = null) {
     window.location.replace("login.html");
     return null;
   }
+    // Increment 1: the disclaimer must be accepted before anything else.
+  if (!profile.disclaimerAcceptedAt && !window.location.pathname.endsWith("disclaimer.html")) {
+    window.location.replace("disclaimer.html");
+    return null;
+  }
   if (allowedRoles && !allowedRoles.includes(profile.role)) {
     setFlash("accessDenied");
-    window.location.replace(getHomePageForRole(profile.role));
+    window.location.replace(getNextPage(profile));
     return null;
   }
 

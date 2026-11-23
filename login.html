@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!--
-  CogniCare - login.html
+  CogniCare - login.html   (Increment 1 look: css/app.css)
   FR001 (login), FR005 (reset password), FR008 (language), FR025 (senior-friendly)
 
   All logic is in js/auth.js. The IDs below must stay the same:
@@ -14,10 +14,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#0b5ea8">
+  <meta name="theme-color" content="#0b5c6b">
   <title>CogniCare</title>
   <link rel="manifest" href="manifest.json">
-  <link rel="stylesheet" href="css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/app.css">
 </head>
 <body>
 
@@ -37,11 +38,15 @@
     </div>
   </header>
 
-  <main id="main" class="container container-narrow">
+  <main id="main">
+
+    <a class="back-link" href="welcome.html">
+      <span aria-hidden="true">&larr;</span>
+      <span data-i18n="back">Back</span>
+    </a>
 
     <div class="hero">
       <h1 data-i18n="loginTitle">Log In to Your Account</h1>
-      <p data-i18n="tagline">Brain training for a happy heart</p>
     </div>
 
     <section class="card" aria-labelledby="login-heading">
@@ -72,18 +77,15 @@
           <span data-i18n="showPassword">Show password</span>
         </label>
 
-        <button type="submit" id="login-btn"
-                class="btn btn-large btn-block mt-2" data-i18n="login">Login</button>
+        <button type="submit" id="login-btn" class="btn" data-i18n="login">Login</button>
       </form>
 
-      <p class="text-center mt-3">
-        <button type="button" id="forgot-link" class="btn btn-secondary"
-                data-i18n="forgotPassword">Forgot your password?</button>
-      </p>
+      <button type="button" id="forgot-link" class="btn btn-link"
+              data-i18n="forgotPassword">Forgot your password?</button>
     </section>
 
     <!-- Reset password (FR005): hidden until "Forgot password?" is pressed -->
-    <section id="reset-section" class="card" aria-labelledby="reset-heading" hidden>
+    <section id="reset-section" class="panel stack" aria-labelledby="reset-heading" hidden>
       <h2 id="reset-heading" data-i18n="resetPasswordTitle">Reset Password</h2>
       <p data-i18n="resetPasswordText">Enter your email. We will send a link to set a new password.</p>
 
@@ -94,7 +96,7 @@
                autocapitalize="none" spellcheck="false">
       </div>
 
-      <div class="btn-group">
+      <div class="stack">
         <button type="button" id="reset-btn" class="btn" data-i18n="sendResetLink">Send Link</button>
         <button type="button" id="reset-cancel" class="btn btn-secondary" data-i18n="cancel">Cancel</button>
       </div>
@@ -103,7 +105,7 @@
     <!-- Link to registration -->
     <section class="card text-center" aria-labelledby="no-account">
       <p id="no-account" data-i18n="noAccountYet">Don't have an account yet?</p>
-      <a class="btn btn-secondary btn-large btn-block" href="register.html" data-i18n="register">Register</a>
+      <a class="btn btn-secondary" href="register.html" data-i18n="register">Register</a>
     </section>
 
   </main>

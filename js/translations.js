@@ -15,6 +15,9 @@
  *     import { t } from "./translations.js";
  *     statusEl.textContent = t("voiceStreak", { days: 5 });
  *
+ * RULE: every key must exist in BOTH bm and en. If you add a key
+ * to one, add it to the other too.
+ *
  * FR008 (language preference) and FR013 (instructions in the
  * selected language) are handled by this file.
  * ============================================================
@@ -34,6 +37,9 @@ export const translations = {
 
     // ---- Navigation ----
     home: "Utama",
+    practice: "Latihan",
+    progress: "Kemajuan",
+    mainMenu: "Menu utama",
     games: "Permainan",
     dashboard: "Papan Pemuka",
     settings: "Tetapan",
@@ -47,6 +53,9 @@ export const translations = {
     welcome: "Selamat datang",
     welcomeUser: "Selamat datang, {name}!",
     welcomeText: "Jom latih otak anda dengan permainan yang mudah dan menyeronokkan.",
+    welcomeHeadline: "Latih minda anda, sedikit setiap hari.",
+    welcomeSub: "Permainan ringkas untuk Perhatian, Kelajuan Otak dan Ingatan.",
+    noTimeLimit: "Tiada had masa. Anda boleh berhenti bila-bila masa.",
     goodJob: "Bagus!",
     tryAgain: "Cuba lagi",
     noScoresYet: "Belum ada markah. Mainkan permainan untuk bermula!",
@@ -66,6 +75,7 @@ export const translations = {
     delete: "Padam",
     close: "Tutup",
     search: "Cari",
+    continue: "Teruskan",
 
     // ---- Login / Register ----
     loginTitle: "Log Masuk ke Akaun Anda",
@@ -102,6 +112,58 @@ export const translations = {
     errNetwork: "Tiada sambungan internet.",
     errGeneric: "Maaf, ada masalah. Sila cuba lagi.",
 
+    // ---- Disclaimer (mandatory for new users) ----
+    disclaimerBadge: "Langkah wajib untuk pengguna baharu",
+    disclaimerTitle: "Sebelum anda bermula",
+    disclaimerIntro: "Sila baca perkara penting ini.",
+    disclaimer1: "Cadangan dalam CogniCare hanyalah cadangan, bukan nasihat perubatan.",
+    disclaimer2: "Ia bukan diagnosis dan tidak menggantikan doktor.",
+    disclaimer3: "Aktiviti ini membantu mengaktifkan minda warga emas.",
+    disclaimer4: "Cadangan mungkin tidak sama dengan pendapat pakar.",
+    disclaimerAgree: "Saya faham dan setuju",
+    disclaimerContinue: "Teruskan",
+    disclaimerHelp: "Butang aktif selepas anda menanda kotak di atas.",
+    disclaimerShort: "Cadangan sahaja. Bukan nasihat perubatan dan bukan diagnosis.",
+    readDisclaimerAgain: "Baca penafian semula",
+
+    // ---- Categories and the three games ----
+    catMemory: "Ingatan",
+    catAttention: "Perhatian",
+    catSpeed: "Kelajuan Otak",
+    catMemoryDesc: "Mengingat dan mencari pasangan",
+    catAttentionDesc: "Memberi tumpuan dan mencari sasaran",
+    catSpeedDesc: "Bertindak balas dengan cepat",
+    gameCardPairs: "Padankan Kad",
+    gameFindTarget: "Cari Sasaran",
+    gameQuickTap: "Tekan Pantas",
+
+    // ---- Where should we start? ----
+    focusTitle: "Di mana kita mula?",
+    focusSub: "Pilih satu. Anda boleh tukar bila-bila masa.",
+    focusNotSure: "Tidak pasti? Cadangkan untuk saya",
+
+    // ---- Home ----
+    greetingMorning: "Selamat pagi, {name}",
+    greetingAfternoon: "Selamat tengah hari, {name}",
+    greetingEvening: "Selamat petang, {name}",
+    homeToday: "Latihan hari ini: 5 minit sahaja.",
+    suggestionTitle: "Cadangan untuk anda",
+    suggestionTry: "Cuba {category} hari ini. Ia sekadar cadangan.",
+
+    // ---- Progress and AI suggestions ----
+    progressTitle: "Kemajuan anda",
+    statusImproving: "Semakin baik",
+    statusSteady: "Stabil",
+    statusStarting: "Baru bermula",
+    byCategory: "Mengikut kategori",
+    levelOf: "Tahap {n} daripada {total}",
+    accuracyPct: "Ketepatan {n}%",
+    why: "Kenapa",
+    streakDays: "Anda bermain {days} hari berturut-turut.",
+    howLevelsChange: "Bagaimana tahap berubah",
+    levelRule: "Naik satu tahap apabila ketepatan 80% atau lebih dalam 3 sesi. Turun satu tahap apabila di bawah 50%.",
+    howAiWorks: "Bagaimana AI berfungsi",
+
     // ---- Settings / Profile ----
     settingsTitle: "Tetapan Anda",
     profile: "Profil",
@@ -119,6 +181,8 @@ export const translations = {
     off: "Mati",
     preview: "Contoh tulisan: Ini ialah saiz tulisan anda.",
     memberSince: "Ahli sejak",
+    voiceAssistant: "Pembantu suara",
+    account: "Akaun",
 
     // ---- Caregiver ----
     linkElderly: "Pautkan Warga Emas",
@@ -131,6 +195,12 @@ export const translations = {
     noLinkedUsers: "Belum ada warga emas dipautkan.",
     unlink: "Buang Pautan",
     selectElderly: "Pilih warga emas",
+    linkCaregiver: "Pautkan penjaga",
+    linkCaregiverText: "Kongsi kemajuan anda dengan ahli keluarga. Anda boleh putuskan pautan bila-bila masa.",
+    caregiverEmail: "E-mel penjaga",
+    caregiverEmailHint: "Penjaga mesti sudah mendaftar.",
+    sendLink: "Hantar pautan",
+    yourCaregivers: "Penjaga anda",
 
     // ---- Games (general) ----
     gamesTitle: "Pilih Permainan",
@@ -157,7 +227,7 @@ export const translations = {
     listening: "Sedang mendengar...",
     sayStart: "Sebut \"Mula\" untuk bermula.",
 
-    // ---- N-Back ----
+    // ---- LEGACY: N-Back (hidden from the new app, kept for old pages) ----
     nback: "N-Back",
     nbackDesc: "Latih ingatan kerja anda",
     nbackLevel: "Tahap: {n}-back",
@@ -176,7 +246,6 @@ export const translations = {
     pausedText: "Ambil masa anda. Tekan Sambung apabila sudah bersedia. Pusingan ini akan bermula semula dengan nombor baharu.",
     next: "Seterusnya",
     finish: "Selesai",
-    practice: "Cuba Latihan",
     practiceTitle: "Pusingan Latihan",
     practiceNote: "Latihan ini tidak dikira dalam markah anda dan tiada tekanan masa.",
     practiceTip: "Kali pertama? Cuba latihan ringkas dahulu supaya lebih mudah faham.",
@@ -190,7 +259,7 @@ export const translations = {
     avgAnswerTime: "Purata masa menjawab",
     confirmEndGame: "Tamatkan permainan sekarang? Markah anda setakat ini akan disimpan.",
 
-    // ---- Match-3 ----
+    // ---- LEGACY: Match-3 ----
     match3: "Padan-3",
     match3Desc: "Latih perhatian dan pengecaman corak",
     match3Level: "Grid: {size}",
@@ -258,10 +327,13 @@ export const translations = {
   en: {
     // ---- App ----
     appName: "CogniCare",
-    tagline: "Brain training for a happy mind",
+    tagline: "Brain training for a happy heart",
 
     // ---- Navigation ----
     home: "Home",
+    practice: "Practice",
+    progress: "Progress",
+    mainMenu: "Main menu",
     games: "Games",
     dashboard: "Dashboard",
     settings: "Settings",
@@ -275,6 +347,9 @@ export const translations = {
     welcome: "Welcome",
     welcomeUser: "Welcome, {name}!",
     welcomeText: "Let's train your brain with simple and enjoyable games.",
+    welcomeHeadline: "Train your mind, a little every day.",
+    welcomeSub: "Simple games for Attention, Brain Speed and Memory.",
+    noTimeLimit: "No time limits. You can stop at any time.",
     goodJob: "Good Job!",
     tryAgain: "Try Again",
     noScoresYet: "No scores yet. Play a game to get started!",
@@ -294,6 +369,7 @@ export const translations = {
     delete: "Delete",
     close: "Close",
     search: "Search",
+    continue: "Continue",
 
     // ---- Login / Register ----
     loginTitle: "Log In to Your Account",
@@ -330,6 +406,58 @@ export const translations = {
     errNetwork: "No internet connection.",
     errGeneric: "Sorry, something went wrong. Please try again.",
 
+    // ---- Disclaimer (mandatory for new users) ----
+    disclaimerBadge: "Required step for new users",
+    disclaimerTitle: "Before you start",
+    disclaimerIntro: "Please read these important points.",
+    disclaimer1: "Suggestions in CogniCare are suggestions only, not medical advice.",
+    disclaimer2: "It is not a diagnosis and does not replace a doctor.",
+    disclaimer3: "These activities help keep the minds of older adults active.",
+    disclaimer4: "Suggestions may differ from the opinion of an expert.",
+    disclaimerAgree: "I understand and agree",
+    disclaimerContinue: "Continue",
+    disclaimerHelp: "The button works after you tick the box above.",
+    disclaimerShort: "Suggestions only. Not medical advice and not a diagnosis.",
+    readDisclaimerAgain: "Read the disclaimer again",
+
+    // ---- Categories and the three games ----
+    catMemory: "Memory",
+    catAttention: "Attention",
+    catSpeed: "Brain Speed",
+    catMemoryDesc: "Remember and find pairs",
+    catAttentionDesc: "Focus and find the target",
+    catSpeedDesc: "React quickly",
+    gameCardPairs: "Card Pairs",
+    gameFindTarget: "Find the Target",
+    gameQuickTap: "Quick Tap",
+
+    // ---- Where should we start? ----
+    focusTitle: "Where should we start?",
+    focusSub: "Pick one. You can change it at any time.",
+    focusNotSure: "Not sure? Suggest one for me",
+
+    // ---- Home ----
+    greetingMorning: "Good morning, {name}",
+    greetingAfternoon: "Good afternoon, {name}",
+    greetingEvening: "Good evening, {name}",
+    homeToday: "Today's practice: just 5 minutes.",
+    suggestionTitle: "Suggestion for you",
+    suggestionTry: "Try {category} today. It is only a suggestion.",
+
+    // ---- Progress and AI suggestions ----
+    progressTitle: "Your progress",
+    statusImproving: "Getting better",
+    statusSteady: "Steady",
+    statusStarting: "Just starting",
+    byCategory: "By category",
+    levelOf: "Level {n} of {total}",
+    accuracyPct: "Accuracy {n}%",
+    why: "Why",
+    streakDays: "You played {days} days in a row.",
+    howLevelsChange: "How levels change",
+    levelRule: "Go up one level when accuracy is 80% or more in 3 sessions. Go down one level when it is below 50%.",
+    howAiWorks: "How the AI works",
+
     // ---- Settings / Profile ----
     settingsTitle: "Your Settings",
     profile: "Profile",
@@ -347,6 +475,8 @@ export const translations = {
     off: "Off",
     preview: "Sample text: This is your font size.",
     memberSince: "Member since",
+    voiceAssistant: "Voice assistant",
+    account: "Account",
 
     // ---- Caregiver ----
     linkElderly: "Link Elderly User",
@@ -359,6 +489,12 @@ export const translations = {
     noLinkedUsers: "No elderly users linked yet.",
     unlink: "Remove Link",
     selectElderly: "Select elderly user",
+    linkCaregiver: "Link a caregiver",
+    linkCaregiverText: "Share your progress with a family member. You can remove the link at any time.",
+    caregiverEmail: "Caregiver's email",
+    caregiverEmailHint: "The caregiver must already be registered.",
+    sendLink: "Send link",
+    yourCaregivers: "Your caregivers",
 
     // ---- Games (general) ----
     gamesTitle: "Choose a Game",
@@ -385,7 +521,7 @@ export const translations = {
     listening: "Listening...",
     sayStart: "Say \"Start\" to begin.",
 
-    // ---- N-Back ----
+    // ---- LEGACY: N-Back (hidden from the new app, kept for old pages) ----
     nback: "N-Back",
     nbackDesc: "Train your working memory",
     nbackLevel: "Level: {n}-back",
@@ -404,7 +540,6 @@ export const translations = {
     pausedText: "Take your time. Press Resume when you are ready. This round will restart with a new number.",
     next: "Next",
     finish: "Finish",
-    practice: "Try Practice",
     practiceTitle: "Practice Round",
     practiceNote: "This practice does not count towards your score and has no time pressure.",
     practiceTip: "First time? Try a short practice first so it is easier to understand.",
@@ -418,7 +553,7 @@ export const translations = {
     avgAnswerTime: "Average answer time",
     confirmEndGame: "End the game now? Your score so far will be saved.",
 
-    // ---- Match-3 ----
+    // ---- LEGACY: Match-3 ----
     match3: "Match-3",
     match3Desc: "Train your attention and pattern recognition",
     match3Level: "Grid: {size}",
@@ -490,7 +625,7 @@ const DEFAULT_LANG = "bm";
 /**
  * Current language ("bm" or "en").
  * Saved in localStorage so the login/register pages (before the
- * user's Firestore profile is loaded) remember the last choice.
+ * user's profile is loaded from the API) remember the last choice.
  */
 export function getLanguage() {
   try {

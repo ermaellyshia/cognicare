@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<!--
+  CogniCare - focus.html   (Increment 1: "Where should we start?")
+
+  The elderly user picks ONE category to start with. The choice is saved
+  in MySQL (users.focus_area) by js/focus.js. "Not sure" saves nothing
+  special (null) and lets the AI suggest later.
+
+  Each button has data-focus="memory" | "attention" | "speed" | "" (not sure).
+  IDs that js/focus.js needs: form-message
+-->
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b5c6b">
+  <title>CogniCare</title>
+  <link rel="manifest" href="manifest.json">
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+
+  <a class="skip-link" href="#main" data-i18n="skipToContent">Skip to main content</a>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <span class="brand">CogniCare</span>
+
+      <div class="btn-group" role="group" aria-labelledby="lang-label">
+        <span id="lang-label" class="sr-only" data-i18n="language">Language</span>
+        <button type="button" class="btn filter-btn" data-set-lang="bm" aria-pressed="false">Bahasa Malaysia</button>
+        <button type="button" class="btn filter-btn" data-set-lang="en" aria-pressed="false">English</button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+
+    <div class="hero">
+      <h1 data-i18n="focusTitle">Where should we start?</h1>
+      <p data-i18n="focusSub">Pick one. You can change it at any time.</p>
+    </div>
+
+    <!-- Error message (for example, the server could not save) -->
+    <div id="form-message" role="alert" aria-live="assertive" hidden></div>
+
+    <section class="card" aria-labelledby="focus-heading">
+      <h2 id="focus-heading" class="sr-only" data-i18n="focusTitle">Where should we start?</h2>
+
+      <button type="button" class="cat-card cat-memory" data-focus="memory">
+        <span class="cat-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg>
+        </span>
+        <span>
+          <strong data-i18n="catMemory">Memory</strong>
+          <span class="desc" data-i18n="catMemoryDesc">Remember and find pairs</span>
+        </span>
+      </button>
+
+      <button type="button" class="cat-card cat-attention" data-focus="attention">
+        <span class="cat-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/></svg>
+        </span>
+        <span>
+          <strong data-i18n="catAttention">Attention</strong>
+          <span class="desc" data-i18n="catAttentionDesc">Focus and find the target</span>
+        </span>
+      </button>
+
+      <button type="button" class="cat-card cat-speed" data-focus="speed">
+        <span class="cat-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg>
+        </span>
+        <span>
+          <strong data-i18n="catSpeed">Brain Speed</strong>
+          <span class="desc" data-i18n="catSpeedDesc">React quickly</span>
+        </span>
+      </button>
+
+      <button type="button" class="btn btn-secondary" data-focus="" data-i18n="focusNotSure">Not sure? Suggest one for me</button>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <p>CogniCare</p>
+  </footer>
+
+  <script type="module" src="js/focus.js"></script>
+</body>
+</html>

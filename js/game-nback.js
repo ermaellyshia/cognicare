@@ -67,6 +67,7 @@ import { t, nbackInstruction } from "./translations.js";
 const POINTS_PER_CORRECT = 10;   // multiplied by the level (n)
 const FEEDBACK_MS = 1500;        // how long "Correct!" / "Wrong" stays on screen
 const WARMUP_GAP_MS = 700;       // pause after a warm-up number
+const MAX_RT_MS = 15000;         // a slower answer counts as 15 s (distraction, not thinking)
 const DEFAULT_ROUNDS = 20;
 const DEFAULT_DISPLAY_MS = 2000; // brief: number shown for 2 seconds
 const PRACTICE_SEQUENCE = [4, 7, 7, 2]; // 1-back example: remember, NO, YES, NO
@@ -94,7 +95,10 @@ function freshState() {
     round: 0,            // scored rounds finished
     total: DEFAULT_ROUNDS,
     score: 0,
-    current: null,       // { value, isMatch, warmup }
+    counts: { hit: 0, miss: 0, falseAlarm: 0, reject: 0 }, // for the AI recommender
+    rtSum: 0,            // sum of response times (each capped, see MAX_RT_MS)
+    rtCount: 0,          // how many answers were timed
+    current: null,       // { value, isMatch, warmup }       // { value, isMatch, warmup }
     awaiting: false,     // true while the player may answer
     token: 0,            // changes every round, so old timers do nothing
     startedAt: 0,
@@ -435,6 +439,13 @@ export function startGame({ container, profile, onExit }) {
     const correct = (choice === "yes") === state.current.isMatch;
     const levelBefore = engine.level;
 
+    // Keep the data the AI recommender needs (saved when the game ends)
+    const saidYes = choice === "yes";
+    if (state.current.isMatch) state.counts[saidYes ? "hit" : "miss"]++;
+    else state.counts[saidYes ? "falseAlarm" : "reject"]++;
+    state.rtSum += Math.min(responseMs, MAX_RT_MS);
+    state.rtCount++;
+
     // Tell the AI engine, it decides if the level changes
     const result = engine.recordAnswer(correct, responseMs);
 
@@ -698,6 +709,14 @@ export function startGame({ container, profile, onExit }) {
       duration: Math.max(0, Math.round((Date.now() - state.startedAt - state.pausedMs) / 1000)),
       completed,
     };
+    // AI data: only when at least one answer was given
+    if (state.rtCount > 0) {
+      state.payload.hitCount = state.counts.hit;
+      state.payload.missCount = state.counts.miss;
+      state.payload.falseAlarmCount = state.counts.falseAlarm;
+      state.payload.rejectCount = state.counts.reject;
+      state.payload.avgResponseMs = Math.round(state.rtSum / state.rtCount);
+    }
 
     renderResult();
     speak(t("voiceGameOver", { score: state.score }));

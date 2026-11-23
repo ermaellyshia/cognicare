@@ -32,6 +32,7 @@
  *
  * FEATURES AND THEIR API ROUTES
  *   login / register / me          /api/auth/...        (ready)
+ *   acceptDisclaimer, setFocusArea /api/me/...          (Increment 1, ready)
  *   saveGameSession, getUserSessions, getAllSessions,
  *   getPlayStreak                  /api/sessions/...    (next step)
  *   getSystemConfig                /api/config          (falls back to
@@ -262,6 +263,44 @@ export function onAuthChange(callback) {
 }
 
 // ------------------------------------------------------------
+// 4b. INCREMENT 1: disclaimer + focus area   - route: /api/me
+// ------------------------------------------------------------
+
+/** The user accepts the disclaimer. Returns the updated profile. */
+export async function acceptDisclaimer() {
+  const result = await request("/me/consent", { method: "PUT" });
+  cachedProfile = result.user; // so the page guards see the new state at once
+  cachedForToken = getToken();
+  return result.user;
+}
+
+/**
+ * Save the starting category.
+ * @param {"memory"|"attention"|"speed"|null} focusArea  null = "not sure"
+ */
+export async function setFocusArea(focusArea) {
+  const result = await request("/me/focus", { method: "PUT", body: { focusArea } });
+  cachedProfile = result.user;
+  cachedForToken = getToken();
+  return result.user;
+}
+
+/**
+ * Where should the user go right after login / register?
+ *   "disclaimer"  has not accepted the disclaimer yet (mandatory)
+ *   "focus"       accepted, but has not chosen a category yet
+ *   "home"        ready
+ * Note: "not sure" is saved as focusArea = null, so the category page
+ * is shown again next time. If you want "not sure" to be remembered,
+ * we can store it as a fourth value later.
+ */
+export function nextStepAfterLogin(user) {
+  if (!user?.disclaimerAcceptedAt) return "disclaimer";
+  if (user.role === "elderly" && !user.focusArea) return "focus"; // only elderly choose a category
+  return "home";
+}
+
+// ------------------------------------------------------------
 // 5. USERS / PROFILE  (FR004, FR008-FR010)   - route: /api/users
 // ------------------------------------------------------------
 
@@ -337,6 +376,14 @@ export async function saveGameSession(userId, result) {
       difficultyLevel: String(result.difficultyLevel),
       duration: Math.round(result.duration || 0),
       completed: result.completed !== false,
+      // AI data (N-Back): left out when the game did not send it
+      ...(result.hitCount !== undefined && {
+        hitCount: result.hitCount,
+        missCount: result.missCount,
+        falseAlarmCount: result.falseAlarmCount,
+        rejectCount: result.rejectCount,
+        avgResponseMs: result.avgResponseMs,
+      }),
     },
   });
   return response.session;
