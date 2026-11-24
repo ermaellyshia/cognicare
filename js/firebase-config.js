@@ -384,6 +384,12 @@ export async function saveGameSession(userId, result) {
         rejectCount: result.rejectCount,
         avgResponseMs: result.avgResponseMs,
       }),
+      // AI data (new games: Card Pairs, ...)
+      ...(result.attemptCount !== undefined && {
+        attemptCount: result.attemptCount,
+        correctCount: result.correctCount,
+        avgResponseMs: result.avgResponseMs,
+      }),
     },
   });
   return response.session;
