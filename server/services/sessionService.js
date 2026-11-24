@@ -10,15 +10,21 @@
  * SHAPE OF A SESSION OBJECT (same names the website already uses):
  *   { sessionId, userId, gameType, difficultyLevel, score,
  *     duration, completed, datePlayed,
- *     hitCount, missCount, falseAlarmCount, rejectCount,   (AI data)
+ *     hitCount, missCount, falseAlarmCount, rejectCount,   (N-Back AI data)
+ *     attemptCount, correctCount,                          (new games AI data)
  *     accuracyPct, hitRatePct, falseAlarmPct, avgResponseMs }
- *   The AI fields are null for games saved before migration_001.
- *   gameType        "N-Back" | "Match-3"
- *   difficultyLevel "2-back"  | "4x4"
+ *   The AI fields are null when the game did not send them.
+ *   gameType        "N-Back" | "Match-3" | "Card Pairs"
+ *   difficultyLevel "2-back" | "4x4"     | "8 cards"
  *   duration        seconds
  *
+ * TWO KINDS OF ANSWER DATA (a game sends one kind or none):
+ *   N-Back (YES/NO answers):  hitCount, missCount, falseAlarmCount, rejectCount
+ *   New games (Increment 1):  attemptCount, correctCount
+ *   Both may also send avgResponseMs.
+ *
  * The database stores a level_id instead of the two texts; the view
- * v_session_details (schema.sql) joins them back together.
+ * v_session_details joins them back together and calculates accuracy.
  * ============================================================
  */
 
@@ -42,12 +48,14 @@ function toSession(row) {
     duration: row.duration,
     completed: Boolean(row.completed),
     datePlayed: row.played_at,
-    // AI data (null for old games). MySQL gives ROUND() back as text, so
+    // AI data (null when not sent). MySQL gives ROUND() back as text, so
     // toNumberOrNull turns it into a real number.
     hitCount: toNumberOrNull(row.hit_count),
     missCount: toNumberOrNull(row.miss_count),
     falseAlarmCount: toNumberOrNull(row.false_alarm_count),
     rejectCount: toNumberOrNull(row.reject_count),
+    attemptCount: toNumberOrNull(row.attempt_count),
+    correctCount: toNumberOrNull(row.correct_count),
     accuracyPct: toNumberOrNull(row.accuracy_pct),
     hitRatePct: toNumberOrNull(row.hit_rate_pct),
     falseAlarmPct: toNumberOrNull(row.false_alarm_pct),
@@ -59,14 +67,17 @@ function toNumberOrNull(value) {
   return value === null || value === undefined ? null : Number(value);
 }
 
+function isGiven(value) {
+  return value !== undefined && value !== null;
+}
+
 /**
- * Read the optional AI data sent by the game.
- * Either ALL four counts are sent (whole numbers 0..1000) or none.
- * @returns {null | {hits, misses, falseAlarms, rejects, avgResponseMs}}
+ * N-Back data: either ALL four counts are sent (whole numbers 0..1000) or none.
+ * @returns {null | {hits, misses, falseAlarms, rejects}}
  */
 function readAnswerCounts(result) {
   const names = ["hitCount", "missCount", "falseAlarmCount", "rejectCount"];
-  const given = names.filter((n) => result?.[n] !== undefined && result?.[n] !== null);
+  const given = names.filter((n) => isGiven(result?.[n]));
   if (given.length === 0) return null;
   if (given.length !== names.length) {
     throw badInput("Send all four answer counts (hit, miss, false alarm, reject) or none.");
@@ -75,16 +86,41 @@ function readAnswerCounts(result) {
   if (values.some((v) => !Number.isInteger(v) || v < 0 || v > 1000)) {
     throw badInput("Answer counts must be whole numbers from 0 to 1000.");
   }
-
-  let avgResponseMs = null;
-  if (result.avgResponseMs !== undefined && result.avgResponseMs !== null) {
-    avgResponseMs = Math.round(Number(result.avgResponseMs));
-    if (!Number.isFinite(avgResponseMs) || avgResponseMs < 0 || avgResponseMs > 600_000) {
-      throw badInput("Average response time must be between 0 and 600000 ms.");
-    }
-  }
   const [hits, misses, falseAlarms, rejects] = values;
-  return { hits, misses, falseAlarms, rejects, avgResponseMs };
+  return { hits, misses, falseAlarms, rejects };
+}
+
+/**
+ * New-game data: BOTH attemptCount and correctCount are sent, or none.
+ * correctCount can not be more than attemptCount.
+ * @returns {null | {attempts, correct}}
+ */
+function readTryCounts(result) {
+  const names = ["attemptCount", "correctCount"];
+  const given = names.filter((n) => isGiven(result?.[n]));
+  if (given.length === 0) return null;
+  if (given.length !== names.length) {
+    throw badInput("Send both attemptCount and correctCount, or neither.");
+  }
+  const attempts = Number(result.attemptCount);
+  const correct = Number(result.correctCount);
+  if (![attempts, correct].every((v) => Number.isInteger(v) && v >= 0 && v <= 1000)) {
+    throw badInput("Attempts and correct counts must be whole numbers from 0 to 1000.");
+  }
+  if (correct > attempts) {
+    throw badInput("correctCount can not be more than attemptCount.");
+  }
+  return { attempts, correct };
+}
+
+/** Average response time in milliseconds (optional). @returns {number|null} */
+function readAvgResponse(result) {
+  if (!isGiven(result?.avgResponseMs)) return null;
+  const value = Math.round(Number(result.avgResponseMs));
+  if (!Number.isFinite(value) || value < 0 || value > 600_000) {
+    throw badInput("Average response time must be between 0 and 600000 ms.");
+  }
+  return value;
 }
 
 // ------------------------------------------------------------
@@ -97,7 +133,8 @@ function readAnswerCounts(result) {
  * @param {{gameType:string, difficultyLevel:string, score:number,
  *          duration?:number, completed?:boolean,
  *          hitCount?:number, missCount?:number, falseAlarmCount?:number,
- *          rejectCount?:number, avgResponseMs?:number}} result
+ *          rejectCount?:number, attemptCount?:number, correctCount?:number,
+ *          avgResponseMs?:number}} result
  * @returns the saved session
  */
 export async function saveSession(userId, result) {
@@ -114,9 +151,15 @@ export async function saveSession(userId, result) {
     throw badInput("Duration must be between 0 and 86400 seconds.");
   }
 
-  const counts = readAnswerCounts(result); // optional AI data
+  const counts = readAnswerCounts(result); // optional AI data (N-Back)
+  const tries = readTryCounts(result); // optional AI data (new games)
+  if (counts && tries) {
+    throw badInput("Send the four answer counts OR attempts and correct, not both.");
+  }
+  const avgResponseMs = readAvgResponse(result);
 
-  // The game + level must exist in the lookup tables (seeded by schema.sql).
+  // The game + level must exist in the lookup tables (seeded by schema.sql
+  // and the migrations).
   const level = await queryOne(
     `SELECT l.level_id
      FROM difficulty_levels l
@@ -129,8 +172,9 @@ export async function saveSession(userId, result) {
   const saved = await execute(
     `INSERT INTO game_sessions
        (user_id, level_id, score, hit_count, miss_count, false_alarm_count,
-        reject_count, avg_response_ms, duration_sec, completed)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        reject_count, avg_response_ms, attempt_count, correct_count,
+        duration_sec, completed)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       userId,
       level.level_id,
@@ -139,7 +183,9 @@ export async function saveSession(userId, result) {
       counts?.misses ?? null,
       counts?.falseAlarms ?? null,
       counts?.rejects ?? null,
-      counts?.avgResponseMs ?? null,
+      avgResponseMs,
+      tries?.attempts ?? null,
+      tries?.correct ?? null,
       duration,
       completed ? 1 : 0,
     ]
@@ -158,7 +204,7 @@ export async function getSessionById(sessionId) {
 
 /**
  * Sessions of ONE user, oldest -> newest (the order Chart.js needs).
- * @param {"All"|"N-Back"|"Match-3"} gameType
+ * @param {"All"|"N-Back"|"Match-3"|"Card Pairs"} gameType
  */
 export async function getUserSessions(userId, gameType = "All") {
   const filter = gameType === "All" ? "" : "AND game_type = ?";

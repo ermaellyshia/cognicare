@@ -30,7 +30,7 @@ import { saveSession, getUserSessions, getAllSessions, getPlayStreak } from "../
 import { friendlyDbError } from "../db.js";
 
 const router = Router();
-const GAME_FILTERS = ["All", "N-Back", "Match-3"];
+const GAME_FILTERS = ["All", "N-Back", "Match-3", "Card Pairs"];
 
 // ------------------------------------------------------------
 // HELPERS
@@ -85,7 +85,7 @@ router.post("/", requireAuth, async (req, res) => {
 // ------------------------------------------------------------
 router.get("/all", requireAuth, requireRole("admin"), async (req, res) => {
   const gameType = readGameFilter(req);
-  if (!gameType) return fail(res, 400, "gameType must be All, N-Back or Match-3.");
+  if (!gameType) return fail(res, 400, "gameType must be All, N-Back, Match-3 or Card Pairs.");
   try {
     res.json({ sessions: await getAllSessions(gameType) });
   } catch (err) {
@@ -113,7 +113,7 @@ router.get("/", requireAuth, async (req, res) => {
   const target = resolveTargetUser(req);
   if (target.problem) return fail(res, ...target.problem);
   const gameType = readGameFilter(req);
-  if (!gameType) return fail(res, 400, "gameType must be All, N-Back or Match-3.");
+  if (!gameType) return fail(res, 400, "gameType must be All, N-Back, Match-3 or Card Pairs.");
   try {
     res.json({ sessions: await getUserSessions(target.userId, gameType) });
   } catch (err) {
