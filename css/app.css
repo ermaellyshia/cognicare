@@ -586,3 +586,120 @@ fieldset .choice:has(input:checked) {
   .board { gap: 8px; }
   .tile { min-height: 64px; }
 }
+
+/* ============================================================
+   FIND THE TARGET (Cari Sasaran) - Stroop style
+   Levels 1-3: answer the INK colour of a colour word
+   Levels 4-5: answer the BORDER colour of a shape
+   ============================================================ */
+
+/* The five colours (dark enough to read on the cream background) */
+:root {
+  --c-red: #c62828;
+  --c-blue: #1d4e9e;
+  --c-green: #2b7a3d;
+  --c-orange: #b85500;
+  --c-purple: #6a2c91;
+}
+.ink-red    { color: var(--c-red); }
+.ink-blue   { color: var(--c-blue); }
+.ink-green  { color: var(--c-green); }
+.ink-orange { color: var(--c-orange); }
+.ink-purple { color: var(--c-purple); }
+
+/* "Press the colour of the TEXT / BORDER" */
+.stroop-prompt {
+  margin: 0;
+  text-align: center;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+/* Big area that shows the word or the shape */
+.stroop-stimulus {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 220px;
+  padding: 16px;
+  background: #fff;
+  border: 3px solid var(--border);
+  border-radius: 16px;
+}
+.stroop-word {
+  font-size: clamp(2.6rem, 13vw, 4.5rem);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1.1;
+}
+.stroop-shape svg {
+  display: block;
+  width: min(220px, 60vw);
+  height: min(220px, 60vw);
+}
+.stroop-shape text {
+  font-family: inherit;
+  font-weight: 700;
+  fill: var(--ink); /* neutral: the word inside is only a distraction */
+}
+
+/* Answer buttons: round, coloured, with the colour name written on them */
+.stroop-answers {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+}
+.answer-btn {
+  position: relative;
+  min-width: 112px;
+  min-height: 64px;
+  padding: 0 22px;
+  font: inherit;
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #fff;
+  border: 3px solid var(--ink);
+  border-radius: 999px;
+  cursor: pointer;
+}
+.answer-btn:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+.answer-btn:active { transform: scale(0.97); }
+.bg-red    { background: var(--c-red); }
+.bg-blue   { background: var(--c-blue); }
+.bg-green  { background: var(--c-green); }
+.bg-orange { background: var(--c-orange); }
+.bg-purple { background: var(--c-purple); }
+
+/* Feedback is never colour only: a mark is added as well */
+.answer-btn.is-right::after,
+.answer-btn.is-wrong::after {
+  position: absolute;
+  top: -10px;
+  right: -6px;
+  width: 28px;
+  height: 28px;
+  line-height: 28px;
+  text-align: center;
+  font-size: 1rem;
+  color: #fff;
+  background: var(--ink);
+  border-radius: 50%;
+}
+.answer-btn.is-right::after { content: "\2713"; }
+.answer-btn.is-wrong::after { content: "\2715"; }
+.answer-btn.is-wrong { border-style: dashed; }
+
+/* Small example in the intro screen */
+.stroop-example { text-align: center; }
+.stroop-example .stroop-stimulus {
+  min-height: 0;
+  margin-bottom: 8px;
+  padding: 8px;
+  border: none;
+  background: transparent;
+}
+.stroop-example .stroop-word { font-size: 2.4rem; }
+.stroop-example .stroop-shape svg { width: 120px; height: 120px; }
+.stroop-example p { margin: 0; }

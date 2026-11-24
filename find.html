@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<!--
+  CogniCare - find.html   (Attention game: Find the Target = Stroop style)
+
+  Three screens in one page. js/game-find.js shows one at a time:
+    #intro   instructions + an example + Start button
+    #play    the word or shape + the colour buttons
+    #result  the result and the level for next time
+
+  IDs that js/game-find.js needs:
+  intro, play, result, start-btn, level-text, how-text, example,
+  round, prompt, stimulus, answers, status,
+  res-rounds, res-accuracy, res-time, res-level, save-status, again-btn,
+  form-message
+-->
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b5c6b">
+  <title>CogniCare</title>
+  <link rel="manifest" href="manifest.json">
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+
+  <a class="skip-link" href="#main" data-i18n="skipToContent">Skip to main content</a>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <span class="brand">CogniCare</span>
+    </div>
+  </header>
+
+  <main id="main">
+
+    <a class="back-link" href="index.html">
+      <span aria-hidden="true">&larr;</span>
+      <span data-i18n="back">Back</span>
+    </a>
+
+    <div id="form-message" role="alert" aria-live="assertive" hidden></div>
+
+    <!-- ========== 1. INTRO ========== -->
+    <section id="intro" class="stack" aria-labelledby="game-title">
+      <div class="hero">
+        <h1 id="game-title" data-i18n="gameFindTarget">Find the Target</h1>
+        <p id="level-text">&nbsp;</p>
+      </div>
+      <!-- The text depends on the level (word or shape); js/game-find.js fills it -->
+      <p id="how-text" class="panel"></p>
+      <!-- A small example, drawn by js/game-find.js -->
+      <div id="example" class="panel stroop-example" aria-hidden="true"></div>
+      <button type="button" id="start-btn" class="btn" data-i18n="startGame">Start Game</button>
+    </section>
+
+    <!-- ========== 2. PLAY ========== -->
+    <section id="play" class="stack" aria-labelledby="play-title" hidden>
+      <h1 id="play-title" class="sr-only" data-i18n="gameFindTarget">Find the Target</h1>
+      <div class="scorebar">
+        <span id="round"></span>
+      </div>
+
+      <!-- Tells the player what to look at: the INK colour or the BORDER colour -->
+      <p id="prompt" class="stroop-prompt"></p>
+
+      <!-- The word or the shape (drawn by js/game-find.js) -->
+      <div id="stimulus" class="stroop-stimulus"></div>
+
+      <!-- The colour buttons (created by js/game-find.js) -->
+      <div id="answers" class="stroop-answers" role="group" data-i18n-aria-label="findAnswers" aria-label="Colour buttons"></div>
+
+      <!-- Spoken by screen readers: "Correct!" / "Not that one." -->
+      <p id="status" class="status" role="status" aria-live="polite">&nbsp;</p>
+    </section>
+
+    <!-- ========== 3. RESULT ========== -->
+    <section id="result" class="stack" aria-labelledby="result-title" hidden>
+      <div class="hero">
+        <h1 id="result-title" data-i18n="findDoneTitle">Well done!</h1>
+      </div>
+      <div class="panel">
+        <ul class="facts-list">
+          <li id="res-rounds"></li>
+          <li id="res-accuracy"></li>
+          <li id="res-time"></li>
+        </ul>
+      </div>
+      <p id="res-level" class="alert alert-info"></p>
+      <p id="save-status" class="note text-center" role="status" aria-live="polite"></p>
+      <button type="button" id="again-btn" class="btn" data-i18n="playAgain">Play Again</button>
+      <a class="btn btn-secondary" href="index.html" data-i18n="home">Home</a>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <p>CogniCare</p>
+  </footer>
+
+  <script type="module" src="js/game-find.js"></script>
+</body>
+</html>
