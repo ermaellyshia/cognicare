@@ -703,3 +703,86 @@ fieldset .choice:has(input:checked) {
 .stroop-example .stroop-word { font-size: 2.4rem; }
 .stroop-example .stroop-shape svg { width: 120px; height: 120px; }
 .stroop-example p { margin: 0; }
+
+/* ============================================================
+   QUICK TAP (Tekan Pantas) - bubble tracking
+   Phases: look (targets marked) -> track (all alike, moving) -> pick
+   ============================================================ */
+
+/* The area where the bubbles move (JS reads its size) */
+.arena {
+  position: relative;
+  width: 100%;
+  max-width: 440px;
+  aspect-ratio: 1 / 1;
+  margin: 8px auto;
+  overflow: hidden;
+  background: var(--tint);
+  border: 3px solid var(--primary);
+  border-radius: 16px;
+  touch-action: manipulation;
+}
+
+/* One bubble. JS moves it with transform: translate(x, y). */
+.bubble {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 60px;
+  height: 60px;
+  margin: 0;
+  padding: 0;
+  font: inherit;
+  font-size: 1.7rem;
+  font-weight: 700;
+  line-height: 1;
+  color: #fff;
+  background: var(--primary);
+  border: 4px solid var(--primary-dark);
+  border-radius: 50%;
+  cursor: default;
+  will-change: transform;
+}
+.bubble:disabled { opacity: 1; }
+.bubble:focus-visible { outline: 3px solid var(--ink); outline-offset: 4px; }
+
+/* Look phase: marked target = orange + double ring + star (not colour only) */
+.bubble.is-marked {
+  background: var(--c-orange);
+  border-color: var(--ink);
+  box-shadow: 0 0 0 5px #fff, 0 0 0 9px var(--ink);
+}
+.bubble.is-marked::after { content: "\2605"; }
+
+/* Pick phase: tappable */
+.bubble.is-pickable { cursor: pointer; }
+.bubble.is-pickable:hover { background: var(--primary-dark); }
+
+/* Chosen by the player: dark + ring */
+.bubble.is-chosen {
+  background: var(--primary-dark);
+  border-color: var(--ink);
+  box-shadow: 0 0 0 5px #fff, 0 0 0 9px var(--ink);
+}
+.bubble.is-chosen::after { content: "\25CF"; }
+
+/* After checking: right / wrong / missed. Each has its own mark. */
+.bubble.is-right {
+  background: #2b6e3f;
+  border-color: var(--ink);
+}
+.bubble.is-right::after { content: "\2713"; }
+
+.bubble.is-wrong {
+  background: var(--error);
+  border-style: dashed;
+  border-color: var(--ink);
+}
+.bubble.is-wrong::after { content: "\2715"; }
+
+.bubble.is-missed {
+  background: var(--c-orange);
+  border-color: var(--ink);
+  box-shadow: 0 0 0 5px #fff, 0 0 0 9px var(--ink);
+}
+.bubble.is-missed::after { content: "\2605"; }
